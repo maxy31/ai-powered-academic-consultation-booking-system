@@ -13,20 +13,16 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Student {
+
     @Id
-    private Long id;  // Matches users.id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
-
-    private String phone;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "advisor_id", referencedColumnName = "id")
-    private Advisor advisor;  // Reference to advisor entity
+    @JoinColumn(name = "advisor_id")
+    private Advisor advisor;
 }

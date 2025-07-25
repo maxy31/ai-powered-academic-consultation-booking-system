@@ -13,21 +13,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Advisor {
+
     @Id
-    private Long id;  // Matches users.id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
 
     @Column(nullable = false)
     private String department;
-
-    private String phone;
 
     @Column(name = "max_daily_appointments")
     private int maxDailyAppointments = 4;

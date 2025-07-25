@@ -15,18 +15,10 @@ import lombok.Setter;
 public class Admin {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
-
-    private String phone;
-
-    private String position;
 }
-

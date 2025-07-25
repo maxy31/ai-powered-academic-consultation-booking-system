@@ -19,6 +19,9 @@ public class Announcement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "publisherName", nullable = false)
+    private String publisherName;
+
     @Column(name = "title", nullable = false, length = 255)
     private String title;
 
@@ -30,8 +33,4 @@ public class Announcement {
 
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "advisor_id", nullable = false)
-    private Advisor advisor;
 }

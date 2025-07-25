@@ -113,14 +113,14 @@ public class AuthController {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(encoder.encode(request.getPassword()));
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPhone(request.getPhoneNumber());
         user.setRole(ERole.STUDENT);
-        user.setEnabled(true);
         user.setCreatedAt(new Date());
         user.setUpdatedAt(new Date());
 
         Student student = new Student();
-        student.setFullName(request.getFirstName() + " " + request.getLastName());
-        student.setPhone(request.getPhoneNumber());
         student.setUser(user);
         user.setStudent(student);
 
@@ -143,15 +143,15 @@ public class AuthController {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(encoder.encode(request.getPassword()));
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPhone(request.getPhoneNumber());
         user.setRole(ERole.ADVISOR);
-        user.setEnabled(true);
         user.setCreatedAt(new Date());
         user.setUpdatedAt(new Date());
 
         Advisor advisor = new Advisor();
-        advisor.setFullName(request.getFirstName() + " " + request.getLastName());
         advisor.setDepartment(request.getDepartment());
-        advisor.setPhone(request.getPhoneNumber());
         advisor.setUser(user);
         user.setAdvisor(advisor);
 
