@@ -1,5 +1,6 @@
 package com.fyp.AABookingProject.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,8 +30,10 @@ public class Announcement {
     private String content;
 
     @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @JsonFormat(pattern = "yyyy-MM-dd' 'HH:mm:ss.SSS")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    @JsonFormat(pattern = "yyyy-MM-dd' 'HH:mm:ss.SSS")
     private LocalDateTime updatedAt;
 }

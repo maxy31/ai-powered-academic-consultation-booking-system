@@ -69,10 +69,9 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/announcements/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")  // ✅ 只有管理员能访问
                         .requestMatchers("/api/advisor/**").hasRole("ADVISOR")  // ✅ 示例
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 );
 
         http.authenticationProvider(authenticationProvider());

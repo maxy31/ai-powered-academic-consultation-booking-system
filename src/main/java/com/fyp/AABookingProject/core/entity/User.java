@@ -1,5 +1,6 @@
 package com.fyp.AABookingProject.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fyp.AABookingProject.core.enumClass.ERole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -43,12 +45,12 @@ public class User {
     private ERole role;
 
     @Column(name = "created_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt = new Date();
+    @JsonFormat(pattern = "yyyy-MM-dd' 'HH:mm:ss.SSS")
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt = new Date();
+    @JsonFormat(pattern = "yyyy-MM-dd' 'HH:mm:ss.SSS")
+    private LocalDateTime updatedAt;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Student student;

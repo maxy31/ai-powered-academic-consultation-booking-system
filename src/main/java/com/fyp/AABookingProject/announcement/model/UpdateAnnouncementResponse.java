@@ -12,12 +12,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CreateAnnouncementResponse {
+public class UpdateAnnouncementResponse {
     private Long id;
     private String title;
     private String content;
     private String publisherName;
 
     @JsonFormat(pattern = "yyyy-MM-dd' 'HH:mm:ss.SSS")
-    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

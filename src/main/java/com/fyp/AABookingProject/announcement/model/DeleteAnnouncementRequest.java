@@ -1,17 +1,14 @@
 package com.fyp.AABookingProject.announcement.model;
 
-import com.fyp.AABookingProject.core.entity.Announcement;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class GetAnnouncementResponse {
-    private List<Announcement> announcementList;
+public class DeleteAnnouncementRequest {
+    private Long id;
 }

@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface AdvisorRepository extends JpaRepository<Advisor, Long> {
     Optional<Advisor> findById(Long id);
+
+    Optional<Advisor> findByUserId(Long userId);
 }

@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @RestController
@@ -117,8 +118,8 @@ public class AuthController {
         user.setLastName(request.getLastName());
         user.setPhone(request.getPhoneNumber());
         user.setRole(ERole.STUDENT);
-        user.setCreatedAt(new Date());
-        user.setUpdatedAt(new Date());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
 
         Student student = new Student();
         student.setUser(user);
@@ -147,8 +148,8 @@ public class AuthController {
         user.setLastName(request.getLastName());
         user.setPhone(request.getPhoneNumber());
         user.setRole(ERole.ADVISOR);
-        user.setCreatedAt(new Date());
-        user.setUpdatedAt(new Date());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
 
         Advisor advisor = new Advisor();
         advisor.setDepartment(request.getDepartment());

@@ -93,17 +93,21 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
-
+		<!-- 在使用 Spring Boot 的项目中，添加这个 starter 最简单 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
 <!--		Python Flask API used -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-<!--		Add Google Cloud Vision Java SDK -->
-		<!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-vision -->
+		<!-- https://mvnrepository.com/artifact/net.sourceforge.tess4j/tess4j -->
 		<dependency>
-			<groupId>com.google.cloud</groupId>
-			<artifactId>google-cloud-vision</artifactId>
+			<groupId>net.sourceforge.tess4j</groupId>
+			<artifactId>tess4j</artifactId>
+			<version>5.11.0</version>
 		</dependency>
 	</dependencies>
 
