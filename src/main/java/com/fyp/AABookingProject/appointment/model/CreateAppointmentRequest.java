@@ -1,19 +1,17 @@
-package com.fyp.AABookingProject.ai.model;
+package com.fyp.AABookingProject.appointment.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @AllArgsConstructor
 @NoArgsConstructor
-@Setter
 @Getter
-public class FreeSlot {
+@Setter
+public class CreateAppointmentRequest {
+    private Long studentId;
     private String day;
     private String startTime;
     private String endTime;
-    private LocalDate date; // 新增具体日期，避免不同学生看到已被占用的同日时间段
 }

@@ -35,6 +35,4 @@ public class Appointment {
     private AppointmentStatus status;
     @Column(name = "created_at")
     private String createdAt;
-    @Column(name = "meeting_notes")
-    private String notes;
 }
