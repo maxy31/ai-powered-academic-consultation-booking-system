@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "timetable_entry")
@@ -24,10 +25,10 @@ public class TimetableEntry {
     private String day;
 
     @Column(name = "start_time", length = 16)
-    private String startTime;
+    private LocalTime startTime;
 
     @Column(name = "end_time", length = 16)
-    private String endTime;
+    private LocalTime endTime;
 
     @Column(name = "grid_index")
     private Integer gridIndex;

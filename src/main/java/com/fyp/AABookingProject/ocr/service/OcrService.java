@@ -21,6 +21,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -85,8 +86,8 @@ public class OcrService {
             TimetableEntry e = new TimetableEntry();
             e.setTimetable(timetable);
             e.setDay((String) m.get("day"));
-            e.setStartTime((String) m.get("start_time"));
-            e.setEndTime((String) m.get("end_time"));
+            e.setStartTime(LocalTime.parse((String) m.get("start_time")));
+            e.setEndTime(LocalTime.parse((String) m.get("end_time")));
             Number gi = (Number) m.get("grid_index");
             Number ns = (Number) m.get("num_slots");
             e.setGridIndex(gi != null ? gi.intValue() : null);

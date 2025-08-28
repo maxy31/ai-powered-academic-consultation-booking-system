@@ -1,4 +1,4 @@
 package com.fyp.AABookingProject.appointment.repository;
 
-public class AppointmentRepository {
+public interface AppointmentRepository {
 }
