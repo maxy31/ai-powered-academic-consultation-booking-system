@@ -1,9 +1,6 @@
 package com.fyp.AABookingProject.appointment.controller;
 
-import com.fyp.AABookingProject.appointment.model.AppointmentBookedListResponse;
-import com.fyp.AABookingProject.appointment.model.AppointmentCreateRequest;
-import com.fyp.AABookingProject.appointment.model.AppointmentResponse;
-import com.fyp.AABookingProject.appointment.model.AppointmentUpdateRequest;
+import com.fyp.AABookingProject.appointment.model.*;
 import com.fyp.AABookingProject.appointment.service.AppointmentService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +22,9 @@ public class AppointmentController {
         return ResponseEntity.ok("Welcome to Booking API.");
     }
 
-    @PostMapping("/getAppointmentList")
-    public ResponseEntity<AppointmentBookedListResponse> bookedList(@Valid @RequestBody LocalDate today){
-        return ResponseEntity.ok(appointmentService.getBookedList(today));
+    @GetMapping("/getAppointmentsList")
+    public ResponseEntity<ActiveAppointmentListResponse> getAppointmentList(){
+        return ResponseEntity.ok(appointmentService.getBookedList());
     }
 
     @PostMapping("/createAppointment")
@@ -40,18 +37,18 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.update(request));
     }
 
-    @DeleteMapping("/deleteAppointment")
-    public ResponseEntity<AppointmentResponse> cancel(@Valid @RequestBody Long id){
-        return ResponseEntity.ok(appointmentService.cancel(id));
+    @PostMapping("/deleteAppointment")
+    public ResponseEntity<AppointmentResponse> cancel(@Valid @RequestBody AdvisorHandleAppointmentRequest appointmentRequest){
+        return ResponseEntity.ok(appointmentService.cancel(appointmentRequest.getAppointmentId()));
     }
 
     @PostMapping("/confirmAppointment")
-    public ResponseEntity<AppointmentResponse> confirm(@Valid @RequestBody Long id){
-        return ResponseEntity.ok(appointmentService.confirm(id));
+    public ResponseEntity<AppointmentResponse> confirm(@Valid @RequestBody AdvisorHandleAppointmentRequest appointmentRequest){
+        return ResponseEntity.ok(appointmentService.confirm(appointmentRequest.getAppointmentId()));
     }
 
     @PostMapping("/rejectAppointment")
-    public ResponseEntity<AppointmentResponse> reject(@Valid @RequestBody Long id){
-        return ResponseEntity.ok(appointmentService.reject(id));
+    public ResponseEntity<AppointmentResponse> reject(@Valid @RequestBody AdvisorHandleAppointmentRequest appointmentRequest){
+        return ResponseEntity.ok(appointmentService.reject(appointmentRequest.getAppointmentId()));
     }
 }

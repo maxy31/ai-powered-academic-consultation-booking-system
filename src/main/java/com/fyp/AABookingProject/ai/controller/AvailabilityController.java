@@ -2,6 +2,7 @@ package com.fyp.AABookingProject.ai.controller;
 
 import com.fyp.AABookingProject.ai.model.FreeSlot;
 import com.fyp.AABookingProject.ai.service.AvailabilityService;
+import com.fyp.AABookingProject.appointment.model.EditAppointmentRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,11 +29,13 @@ public class AvailabilityController {
         return ResponseEntity.ok(slots);
     }
 
+    @PostMapping("/advisor/free")
+    public ResponseEntity<List<FreeSlot>> getAdvisorFree(EditAppointmentRequest editAppointmentRequest) {
+        return ResponseEntity.ok(availabilityService.recommendForAdvisor(editAppointmentRequest));
+    }
+
     @PostMapping("/free")
     public ResponseEntity<List<FreeSlot>> postFree(@RequestBody Map<String,Object> body) {
-        Long studentUserId = body.get("studentUserId") == null ? null : ((Number)body.get("studentUserId")).longValue();
-        Long lecturerUserId = body.get("lecturerUserId") == null ? null : ((Number)body.get("lecturerUserId")).longValue();
-        int topN = body.get("topN") == null ? 0 : ((Number)body.get("topN")).intValue();
         List<FreeSlot> slots = availabilityService.recommend();
         return ResponseEntity.ok(slots);
     }

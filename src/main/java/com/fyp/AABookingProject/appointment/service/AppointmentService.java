@@ -1,10 +1,12 @@
 package com.fyp.AABookingProject.appointment.service;
 
 import com.fyp.AABookingProject.appointment.model.AppointmentBookedListResponse;
+import com.fyp.AABookingProject.appointment.model.ActiveAppointmentListResponse;
 import com.fyp.AABookingProject.appointment.model.AppointmentCreateRequest;
 import com.fyp.AABookingProject.appointment.model.AppointmentResponse;
 import com.fyp.AABookingProject.appointment.model.AppointmentUpdateRequest;
 import com.fyp.AABookingProject.appointment.repository.AppointmentRepository;
+import com.fyp.AABookingProject.core.entity.Advisor;
 import com.fyp.AABookingProject.core.entity.Appointment;
 import com.fyp.AABookingProject.core.entity.User;
 import com.fyp.AABookingProject.core.enumClass.AppointmentStatus;
@@ -28,8 +30,20 @@ public class AppointmentService {
 		this.userRepository = userRepository;
     }
 
-	public AppointmentBookedListResponse getBookedList(LocalDate date){
-		return null;
+	public ActiveAppointmentListResponse getBookedList() {
+		UserDetails ud = getUserDetails();
+		User user = userRepository.findByUsername(ud.getUsername())
+				.orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+		java.util.List<AppointmentStatus> activeStatuses = java.util.List.of(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED);
+		java.util.List<Appointment> list;
+		if (user.getAdvisor() != null) {
+			list = appointmentRepository.findByAdvisorIdAndStatusIn(user.getAdvisor().getId(), activeStatuses);
+		} else {
+			list = java.util.List.of();
+		}
+		var responses = list.stream().map(this::toResponse).toList();
+		return new ActiveAppointmentListResponse(responses);
 	}
 
 	public AppointmentResponse create(AppointmentCreateRequest req) {
