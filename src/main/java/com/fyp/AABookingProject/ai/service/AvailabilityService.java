@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,64 +57,61 @@ public class AvailabilityService {
         if (current.getStudent() == null || current.getStudent().getAdvisor() == null) {
             return List.of();
         }
-        Long studentUserId = current.getId();
-        Long lecturerUserId = current.getStudent().getAdvisor().getUser().getId();
+    Long studentUserId = current.getId();
+    Long advisorUserId = current.getStudent().getAdvisor().getUser().getId(); // 用于课表(基于 user)
+    Long advisorId = current.getStudent().getAdvisor().getId();               // 用于预约(基于 advisor)
 
-        Map<String, List<TimeInterval>> teacherBusy = loadBusyByUserLatestTimetable(lecturerUserId);
+    Map<String, List<TimeInterval>> teacherBusy = loadBusyByUserLatestTimetable(advisorUserId);
         Map<String, List<TimeInterval>> studentBusy = loadBusyByUserLatestTimetable(studentUserId);
         if (teacherBusy.isEmpty() || studentBusy.isEmpty()) return List.of();
 
+        LocalDate today = LocalDate.now();
+        LocalDate thisMonday = today.minusDays((today.getDayOfWeek().getValue()+6)%7);
+        LocalDate endDate = thisMonday.plusWeeks(2).plusDays(4); // 第二周 Friday
+        List<Appointment> advisorAppointments =
+                appointmentRepository.findByAdvisorIdAndDateBetween(advisorId, thisMonday, endDate);
+
         List<FreeSlot> result = new ArrayList<>();
-        // Load existing appointments (current week scope heuristic: today +/- 30 days)
-        var startDate = java.time.LocalDate.now().minusDays(30);
-        var endDate = java.time.LocalDate.now().plusDays(30);
-        List<Appointment> advisorAppointments = appointmentRepository.findByAdvisorIdAndDateBetween(lecturerUserId, startDate, endDate);
-        for (String day : DAYS) {
-            var tBusy = mergeIntervals(teacherBusy.getOrDefault(day, List.of()));
-            var sBusy = mergeIntervals(studentBusy.getOrDefault(day, List.of()));
-            var mutualIntervals = intersectFree(invertToFree(tBusy), invertToFree(sBusy));
-            // 切成 30 分钟槽
-            java.time.LocalDate mappedDate = mapDayToNextDate(day);
-            for (TimeInterval iv : mutualIntervals) {
-                var sliced = sliceIntoSlots(day, mappedDate, iv);
-                // Advisor 级别：只要该时间段被任何学生预约，就不推荐给其它学生
-                List<FreeSlot> filtered = sliced.stream()
-                        .filter(fs -> {
-                            java.time.LocalTime slotStart = java.time.LocalTime.parse(fs.getStartTime());
-                            java.time.LocalTime slotEnd = java.time.LocalTime.parse(fs.getEndTime());
-                            return !isBooked(advisorAppointments, fs.getDate(), slotStart, slotEnd);
-                        })
-                        .toList();
-                result.addAll(filtered);
+        for (int week = 0; week < 2; week++) {
+            for (int dayIdx = 0; dayIdx < DAYS.size(); dayIdx++) {
+                String day = DAYS.get(dayIdx);        // Mon..Fri
+                LocalDate concreteDate = thisMonday.plusWeeks(week).plusDays(dayIdx);
+                var tBusy = mergeIntervals(teacherBusy.getOrDefault(day, List.of()));
+                var sBusy = mergeIntervals(studentBusy.getOrDefault(day, List.of()));
+                var mutual = intersectFree(invertToFree(tBusy), invertToFree(sBusy));
+                for (TimeInterval iv : mutual) {
+                    for (FreeSlot fs : sliceIntoSlots(day, concreteDate, iv)) {
+                        LocalTime slotStart = LocalTime.parse(fs.getStartTime());
+                        LocalTime slotEnd   = LocalTime.parse(fs.getEndTime());
+                        if (!isBooked(advisorAppointments, fs.getDate(), slotStart, slotEnd)) {
+                            result.add(fs);
+                        }
+                    }
+                }
             }
         }
         return result.stream()
-                .sorted(Comparator.comparing((FreeSlot fs) -> dayOrder(fs.getDay()))
+                .sorted(Comparator.comparing((FreeSlot fs)->fs.getDate())
                         .thenComparing(FreeSlot::getStartTime))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private boolean isBooked(List<Appointment> list, java.time.LocalDate date, java.time.LocalTime s, java.time.LocalTime e) {
-        return list.stream()
-                .filter(a -> a.getStatus() != AppointmentStatus.CANCELLED)
+    return list.stream()
+        .filter(a -> a.getStatus() != AppointmentStatus.CANCELLED && a.getStatus() != AppointmentStatus.REJECTED)
                 .filter(a -> a.getDate().equals(date))
                 .anyMatch(a -> a.getStartTime().isBefore(e) && s.isBefore(a.getEndTime()));
     }
 
-    // Map weekday label to the next upcoming actual date (simple heuristic)
-    private java.time.LocalDate mapDayToNextDate(String day) {
-        java.time.LocalDate today = java.time.LocalDate.now();
-        java.time.DayOfWeek target = switch (day) {
-            case "Mon" -> java.time.DayOfWeek.MONDAY;
-            case "Tue" -> java.time.DayOfWeek.TUESDAY;
-            case "Wed" -> java.time.DayOfWeek.WEDNESDAY;
-            case "Thu" -> java.time.DayOfWeek.THURSDAY;
-            case "Fri" -> java.time.DayOfWeek.FRIDAY;
-            default -> today.getDayOfWeek();
-        };
-        int diff = target.getValue() - today.getDayOfWeek().getValue();
-        if (diff < 0) diff += 7;
-        return today.plusDays(diff);
+    // Map weekday label to a date within current week (Mon-Fri) then next week (Mon-Fri) sequence
+    private java.time.LocalDate mapDayToTwoWeekWindow(String day, java.time.LocalDate thisMonday) {
+        // Build ordered 10-day (Mon-Fri x2) list
+        List<String> weekdaySeq = List.of("Mon","Tue","Wed","Thu","Fri","Mon","Tue","Wed","Thu","Fri");
+        int idx = weekdaySeq.indexOf(day);
+        if (idx < 0) idx = 0;
+        int weekOffset = idx / 5; // 0 or 1
+        int dayOffset = idx % 5;  // 0..4
+        return thisMonday.plusWeeks(weekOffset).plusDays(dayOffset);
     }
 
     private Map<String, List<TimeInterval>> loadBusyByUserLatestTimetable(Long userId) {

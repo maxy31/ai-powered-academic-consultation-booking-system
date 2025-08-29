@@ -44,4 +44,14 @@ public class AppointmentController {
     public ResponseEntity<AppointmentResponse> cancel(@Valid @RequestBody Long id){
         return ResponseEntity.ok(appointmentService.cancel(id));
     }
+
+    @PostMapping("/confirmAppointment")
+    public ResponseEntity<AppointmentResponse> confirm(@Valid @RequestBody Long id){
+        return ResponseEntity.ok(appointmentService.confirm(id));
+    }
+
+    @PostMapping("/rejectAppointment")
+    public ResponseEntity<AppointmentResponse> reject(@Valid @RequestBody Long id){
+        return ResponseEntity.ok(appointmentService.reject(id));
+    }
 }

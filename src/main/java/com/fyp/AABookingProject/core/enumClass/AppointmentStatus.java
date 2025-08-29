@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum AppointmentStatus {
     PENDING("PENDING", "Pending"),
     CONFIRMED("CONFIRMED", "Confirmed"),
-    CANCELLED("CANCELLED", "Cancelled");
+    CANCELLED("CANCELLED", "Cancelled"),
+    REJECTED("REJECTED", "Rejected");
 
     public final String code;
     public final String description;

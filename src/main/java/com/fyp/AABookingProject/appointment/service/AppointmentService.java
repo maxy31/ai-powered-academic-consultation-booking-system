@@ -41,20 +41,17 @@ public class AppointmentService {
 			throw new IllegalArgumentException("End time must be after start time");
 		}
 
-		// conflict check for advisor
-		boolean conflictCheck = appointmentRepository
-				.existsByDateAndStartTimeAndEndTime(
-						req.getDate(),
-						req.getEndTime(), // using end as startTimeLessThanEqual upper param
-						req.getStartTime() // using start as endTimeGreaterThanEqual lower param (overlap logic simplified)
-				);
-		if (conflictCheck) {
-			throw new IllegalArgumentException("Time slot already booked by other user.");
-		}
+		Long advisorId = userStudent.getStudent().getAdvisor().getId();
+		// conflict check for advisor (any overlapping appointment not cancelled/rejected)
+		appointmentRepository.findByAdvisorIdAndDate(advisorId, req.getDate()).stream()
+				.filter(a -> a.getStatus() != AppointmentStatus.CANCELLED && a.getStatus() != AppointmentStatus.REJECTED)
+				.filter(a -> overlaps(a.getStartTime(), a.getEndTime(), req.getStartTime(), req.getEndTime()))
+				.findFirst()
+				.ifPresent(a -> { throw new IllegalArgumentException("Time slot already booked by another student"); });
 		// student conflict (simple loop same date)
 		appointmentRepository.findByStudentIdAndDate(userStudent.getStudent().getId(), req.getDate())
 				.stream()
-				.filter(a -> a.getStatus() != AppointmentStatus.CANCELLED)
+				.filter(a -> a.getStatus() != AppointmentStatus.CANCELLED && a.getStatus() != AppointmentStatus.REJECTED)
 				.filter(a -> overlaps(a.getStartTime(), a.getEndTime(), req.getStartTime(), req.getEndTime()))
 				.findFirst()
 				.ifPresent(a -> { throw new IllegalArgumentException("You already have an appointment overlapping this time"); });
@@ -67,6 +64,22 @@ public class AppointmentService {
 		appt.setEndTime(req.getEndTime());
 		appt.setStatus(AppointmentStatus.PENDING);
 		appt.setCreatedAt(LocalDateTime.now().toString());
+		appointmentRepository.save(appt);
+		return toResponse(appt);
+	}
+
+	public AppointmentResponse confirm(Long id) {
+		Appointment appt = appointmentRepository.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+		appt.setStatus(AppointmentStatus.CONFIRMED);
+		appointmentRepository.save(appt);
+		return toResponse(appt);
+	}
+
+	public AppointmentResponse reject(Long id) {
+		Appointment appt = appointmentRepository.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+		appt.setStatus(AppointmentStatus.REJECTED);
 		appointmentRepository.save(appt);
 		return toResponse(appt);
 	}
