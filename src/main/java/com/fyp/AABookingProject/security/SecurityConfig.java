@@ -67,12 +67,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedHandler))  // ✅ 设置未认证响应
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")  // ✅ 只有管理员能访问
-                        .requestMatchers("/api/advisor/**").hasRole("ADVISOR")  // ✅ 示例
-                        .anyRequest().permitAll()
-                );
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/ws/**", "/ws").permitAll() // handshake allowed; token still processed by filters
+            .requestMatchers("/api/notifications/stream").authenticated()
+            .requestMatchers("/api/notifications/**").authenticated()
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/advisor/**").hasRole("ADVISOR")
+            .anyRequest().permitAll()
+        );
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

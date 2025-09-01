@@ -1,23 +1,21 @@
 package com.fyp.AABookingProject.appointment.service;
 
-import com.fyp.AABookingProject.appointment.model.AppointmentBookedListResponse;
 import com.fyp.AABookingProject.appointment.model.ActiveAppointmentListResponse;
 import com.fyp.AABookingProject.appointment.model.AppointmentCreateRequest;
 import com.fyp.AABookingProject.appointment.model.AppointmentResponse;
 import com.fyp.AABookingProject.appointment.model.AppointmentUpdateRequest;
 import com.fyp.AABookingProject.appointment.repository.AppointmentRepository;
-import com.fyp.AABookingProject.core.entity.Advisor;
 import com.fyp.AABookingProject.core.entity.Appointment;
 import com.fyp.AABookingProject.core.entity.User;
 import com.fyp.AABookingProject.core.enumClass.AppointmentStatus;
 import com.fyp.AABookingProject.core.repository.UserRepository;
+import com.fyp.AABookingProject.notification.service.NotificationService;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -25,10 +23,15 @@ public class AppointmentService {
 	private final AppointmentRepository appointmentRepository;
 	private final UserRepository userRepository;
 
-    public AppointmentService(AppointmentRepository appointmentRepository, UserRepository userRepository) {
-        this.appointmentRepository = appointmentRepository;
+	private final NotificationService notificationService;
+
+	public AppointmentService(AppointmentRepository appointmentRepository,
+							  UserRepository userRepository,
+							  NotificationService notificationService) {
+		this.appointmentRepository = appointmentRepository;
 		this.userRepository = userRepository;
-    }
+		this.notificationService = notificationService;
+	}
 
 	public ActiveAppointmentListResponse getBookedList() {
 		UserDetails ud = getUserDetails();
@@ -78,41 +81,56 @@ public class AppointmentService {
 		appt.setEndTime(req.getEndTime());
 		appt.setStatus(AppointmentStatus.PENDING);
 		appt.setCreatedAt(LocalDateTime.now().toString());
-		appointmentRepository.save(appt);
-		return toResponse(appt);
+	appointmentRepository.save(appt);
+	// notify advisor
+	notificationService.notifyAppointmentCreated(appt);
+	return toResponse(appt);
 	}
 
 	public AppointmentResponse confirm(Long id) {
 		Appointment appt = appointmentRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
-		appt.setStatus(AppointmentStatus.CONFIRMED);
-		appointmentRepository.save(appt);
+	AppointmentStatus old = appt.getStatus();
+	appt.setStatus(AppointmentStatus.CONFIRMED);
+	appointmentRepository.save(appt);
+	notificationService.notifyStatusChange(appt, old, AppointmentStatus.CONFIRMED);
 		return toResponse(appt);
 	}
 
 	public AppointmentResponse reject(Long id) {
 		Appointment appt = appointmentRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
-		appt.setStatus(AppointmentStatus.REJECTED);
-		appointmentRepository.save(appt);
+	AppointmentStatus old = appt.getStatus();
+	appt.setStatus(AppointmentStatus.REJECTED);
+	appointmentRepository.save(appt);
+	notificationService.notifyStatusChange(appt, old, AppointmentStatus.REJECTED);
 		return toResponse(appt);
 	}
 
 	public AppointmentResponse update(AppointmentUpdateRequest req) {
 		Appointment appt = appointmentRepository.findById(req.getId())
 				.orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
-		if (req.getDate() != null) appt.setDate(req.getDate());
-		if (req.getStartTime() != null) appt.setStartTime(req.getStartTime());
-		if (req.getEndTime() != null) appt.setEndTime(req.getEndTime());
+		var oldDate = appt.getDate();
+		var oldStart = appt.getStartTime();
+		var oldEnd = appt.getEndTime();
+		boolean changed = false;
+		if (req.getDate() != null && !req.getDate().equals(appt.getDate())) { appt.setDate(req.getDate()); changed = true; }
+		if (req.getStartTime() != null && !req.getStartTime().equals(appt.getStartTime())) { appt.setStartTime(req.getStartTime()); changed = true; }
+		if (req.getEndTime() != null && !req.getEndTime().equals(appt.getEndTime())) { appt.setEndTime(req.getEndTime()); changed = true; }
 		appointmentRepository.save(appt);
+		if (changed) {
+			notificationService.notifyAppointmentTimeUpdated(appt, oldDate, oldStart, oldEnd);
+		}
 		return toResponse(appt);
 	}
 
 	public AppointmentResponse cancel(Long id) {
 		Appointment appt = appointmentRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
-		appt.setStatus(AppointmentStatus.CANCELLED);
-		appointmentRepository.save(appt);
+	AppointmentStatus old = appt.getStatus();
+	appt.setStatus(AppointmentStatus.CANCELLED);
+	appointmentRepository.save(appt);
+	notificationService.notifyStatusChange(appt, old, AppointmentStatus.CANCELLED);
 		return toResponse(appt);
 	}
 

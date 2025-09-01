@@ -24,4 +24,5 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 																					   LocalTime endTime);
 	List<Appointment> findByStudentIdAndStatusIn(Long studentId, Collection<AppointmentStatus> statuses);
 	List<Appointment> findByAdvisorIdAndStatusIn(Long advisorId, Collection<AppointmentStatus> statuses);
+	List<Appointment> findByStatusAndDateAndStartTimeBetween(AppointmentStatus status, LocalDate date, LocalTime start, LocalTime end);
 }
