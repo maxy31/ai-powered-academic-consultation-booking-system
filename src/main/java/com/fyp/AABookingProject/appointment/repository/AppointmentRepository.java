@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+
 import com.fyp.AABookingProject.core.enumClass.AppointmentStatus;
 
 @Repository
@@ -22,6 +24,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 																					   LocalDate date,
 																					   LocalTime startTime,
 																					   LocalTime endTime);
+	Optional<Appointment> findFirstByStudentIdAndStatusOrderByDateDescStartTimeDesc(Long studentId, AppointmentStatus status);
 	List<Appointment> findByStudentIdAndStatusIn(Long studentId, Collection<AppointmentStatus> statuses);
 	List<Appointment> findByAdvisorIdAndStatusIn(Long advisorId, Collection<AppointmentStatus> statuses);
 	List<Appointment> findByStatusAndDateAndStartTimeBetween(AppointmentStatus status, LocalDate date, LocalTime start, LocalTime end);

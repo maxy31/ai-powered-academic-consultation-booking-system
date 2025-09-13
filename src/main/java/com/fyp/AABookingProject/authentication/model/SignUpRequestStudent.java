@@ -16,4 +16,5 @@ public class SignUpRequestStudent {
     private String email;
     private String phoneNumber;
     private String password;
+    private Long advisorId;
 }

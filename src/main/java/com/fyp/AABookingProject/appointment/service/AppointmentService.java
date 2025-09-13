@@ -1,9 +1,6 @@
 package com.fyp.AABookingProject.appointment.service;
 
-import com.fyp.AABookingProject.appointment.model.ActiveAppointmentListResponse;
-import com.fyp.AABookingProject.appointment.model.AppointmentCreateRequest;
-import com.fyp.AABookingProject.appointment.model.AppointmentResponse;
-import com.fyp.AABookingProject.appointment.model.AppointmentUpdateRequest;
+import com.fyp.AABookingProject.appointment.model.*;
 import com.fyp.AABookingProject.appointment.repository.AppointmentRepository;
 import com.fyp.AABookingProject.core.entity.Appointment;
 import com.fyp.AABookingProject.core.entity.User;
@@ -17,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class AppointmentService {
@@ -133,6 +131,31 @@ public class AppointmentService {
 	notificationService.notifyStatusChange(appt, old, AppointmentStatus.CANCELLED);
 		return toResponse(appt);
 	}
+
+	public GetConfirmedAppointment getConfirmedAppointment() {
+        // 1. Get the current logged-in user
+        UserDetails userDetails = getUserDetails();
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 2. Ensure the user is a student
+        if (user.getStudent() == null) {
+            // If the user is not a student, they don't have appointments in this context.
+            return null;
+        }
+        Long studentId = user.getStudent().getId();
+
+        // 3. Use the repository to find the latest confirmed appointment
+        Optional<Appointment> latestAppointment = appointmentRepository
+                .findFirstByStudentIdAndStatusOrderByDateDescStartTimeDesc(studentId, AppointmentStatus.CONFIRMED);
+
+        // 4. Map the result to the DTO or return null if not found
+        return latestAppointment.map(appointment -> new GetConfirmedAppointment(
+                appointment.getId(),
+                appointment.getDate(),
+                appointment.getStartTime()
+        )).orElse(null);
+    }
 
 	private AppointmentResponse toResponse(Appointment appt) {
 		return AppointmentResponse.builder()

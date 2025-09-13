@@ -27,6 +27,11 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getBookedList());
     }
 
+    @GetMapping("/getLatestBooking")
+    public ResponseEntity<GetConfirmedAppointment> getConfirmedAppointment(){
+        return ResponseEntity.ok(appointmentService.getConfirmedAppointment());
+    }
+
     @PostMapping("/createAppointment")
     public ResponseEntity<AppointmentResponse> create(@Valid @RequestBody AppointmentCreateRequest request){
         return ResponseEntity.ok(appointmentService.create(request));

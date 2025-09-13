@@ -1,5 +1,6 @@
 package com.fyp.AABookingProject.authentication.controller;
 
+import com.fyp.AABookingProject.authentication.model.AdvisorListDTO;
 import com.fyp.AABookingProject.authentication.model.LoginRequest;
 import com.fyp.AABookingProject.authentication.model.SignUpRequestAdvisor;
 import com.fyp.AABookingProject.authentication.model.SignUpRequestStudent;
@@ -29,6 +30,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,6 +41,7 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final AdvisorRepository advisorRepository;
     private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
 
@@ -51,6 +56,7 @@ public class AuthController {
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
+        this.advisorRepository = advisorRepository;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
     }
@@ -123,6 +129,10 @@ public class AuthController {
 
         Student student = new Student();
         student.setUser(user);
+
+        Optional<Advisor> advisorTarget = advisorRepository.findById(request.getAdvisorId());
+        advisorTarget.ifPresent(student::setAdvisor);
+
         user.setStudent(student);
 
         userRepository.save(user);
@@ -159,5 +169,17 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("Advisor registered successfully!"));
+    }
+
+    @GetMapping("/showAdvisors")
+    public ResponseEntity<List<AdvisorListDTO>> showAdvisors(){
+        List<Advisor> advisors = advisorRepository.findAll();
+        List<AdvisorListDTO> advisorList = advisors.stream()
+                .map(advisor -> new AdvisorListDTO(
+                        advisor.getId(),
+                        advisor.getUser().getFirstName() + " " + advisor.getUser().getLastName()
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(advisorList);
     }
 }
