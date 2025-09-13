@@ -22,8 +22,13 @@ public class Advisor {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private String department;
+    // Optional numeric department id (can be null if not used)
+    @Column(name = "depart_id")
+    private Long departmentId;
+
+    // Actual department name column present in DB and required (resolves 'Field \"department\" doesn't have a default value')
+    @Column(name = "department", nullable = false)
+    private String department = "null";
 
     @Column(name = "max_daily_appointments")
     private int maxDailyAppointments = 4;

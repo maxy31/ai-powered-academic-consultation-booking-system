@@ -1,16 +1,15 @@
 package com.fyp.AABookingProject.authentication.controller;
 
-import com.fyp.AABookingProject.authentication.model.AdvisorListDTO;
-import com.fyp.AABookingProject.authentication.model.LoginRequest;
-import com.fyp.AABookingProject.authentication.model.SignUpRequestAdvisor;
-import com.fyp.AABookingProject.authentication.model.SignUpRequestStudent;
+import com.fyp.AABookingProject.authentication.model.*;
 import com.fyp.AABookingProject.core.commonModel.response.JwtResponse;
 import com.fyp.AABookingProject.core.commonModel.response.MessageResponse;
 import com.fyp.AABookingProject.core.entity.Advisor;
+import com.fyp.AABookingProject.core.entity.Department;
 import com.fyp.AABookingProject.core.entity.Student;
 import com.fyp.AABookingProject.core.entity.User;
 import com.fyp.AABookingProject.core.enumClass.ERole;
 import com.fyp.AABookingProject.core.repository.AdvisorRepository;
+import com.fyp.AABookingProject.core.repository.DepartmentRepository;
 import com.fyp.AABookingProject.core.repository.StudentRepository;
 import com.fyp.AABookingProject.core.repository.UserRepository;
 import com.fyp.AABookingProject.security.jwt.JwtUtils;
@@ -42,6 +41,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final AdvisorRepository advisorRepository;
+    private final DepartmentRepository departmentRepository;
     private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
 
@@ -50,13 +50,14 @@ public class AuthController {
             AuthenticationManager authenticationManager,
             UserRepository userRepository,
             StudentRepository studentRepository,
-            AdvisorRepository advisorRepository,
+            AdvisorRepository advisorRepository, DepartmentRepository departmentRepository,
             PasswordEncoder encoder,
             JwtUtils jwtUtils
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.advisorRepository = advisorRepository;
+        this.departmentRepository = departmentRepository;
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
     }
@@ -162,7 +163,7 @@ public class AuthController {
         user.setUpdatedAt(LocalDateTime.now());
 
         Advisor advisor = new Advisor();
-        advisor.setDepartment(request.getDepartment());
+        advisor.setDepartmentId(request.getDepartmentId());
         advisor.setUser(user);
         user.setAdvisor(advisor);
 
@@ -181,5 +182,17 @@ public class AuthController {
                 ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(advisorList);
+    }
+
+    @GetMapping("/showDepartments")
+    public ResponseEntity<List<DepartmentListDTO>> showDepartments(){
+        List<Department> departments = departmentRepository.findAll();
+        List<DepartmentListDTO> departmentList = departments.stream()
+                .map(department -> new DepartmentListDTO(
+                        department.getId(),
+                        department.getDepartmentName()
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(departmentList);
     }
 }

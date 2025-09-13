@@ -1,9 +1,11 @@
 package com.fyp.AABookingProject.profile.service;
 
 import com.fyp.AABookingProject.core.entity.Advisor;
+import com.fyp.AABookingProject.core.entity.Department;
 import com.fyp.AABookingProject.core.entity.Student;
 import com.fyp.AABookingProject.core.entity.User;
 import com.fyp.AABookingProject.core.repository.AdvisorRepository;
+import com.fyp.AABookingProject.core.repository.DepartmentRepository;
 import com.fyp.AABookingProject.core.repository.StudentRepository;
 import com.fyp.AABookingProject.core.repository.UserRepository;
 import com.fyp.AABookingProject.profile.model.*;
@@ -25,6 +27,9 @@ public class ProfileService {
 
     @Autowired
     AdvisorRepository advisorRepository;
+
+    @Autowired
+    DepartmentRepository departmentRepository;
 
     @Autowired
     StudentRepository studentRepository;
@@ -96,7 +101,9 @@ public class ProfileService {
                 advisorProfileResponse.setEmail(user.getEmail());
 
                 Advisor advisor = user.getAdvisor();
-                advisorProfileResponse.setDepartment(advisor.getDepartment());
+                Optional<Department> departmentTarget = departmentRepository.findById(advisor.getDepartmentId());
+
+                departmentTarget.ifPresent(department -> advisorProfileResponse.setDepartment(department.getDepartmentName()));
             } else {
                 throw new RuntimeException("Wrong Role Assign,");
             }
@@ -119,7 +126,8 @@ public class ProfileService {
             user.setUpdatedAt(LocalDateTime.now());
 
             Advisor advisor = user.getAdvisor();
-            advisor.setDepartment(editProfileAdvisorRequest.getDepartment());
+
+            advisor.setDepartmentId(editProfileAdvisorRequest.getDepartmentId());
 
             userRepository.save(user);
 
@@ -127,7 +135,7 @@ public class ProfileService {
             response.setFirstName(user.getFirstName());
             response.setLastName(user.getLastName());
             response.setPhoneNumber(user.getPhone());
-            response.setDepartment(user.getAdvisor().getDepartment());
+            response.setDepartmentId(user.getAdvisor().getDepartmentId());
         } else {
             throw new IllegalArgumentException("Username Not Found.");
         }

@@ -9,12 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SignUpRequestAdvisor {
-    private String username;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String password;
-    private String phoneNumber;
+public class DepartmentListDTO {
     private Long departmentId;
+    private String departmentName;
 }
