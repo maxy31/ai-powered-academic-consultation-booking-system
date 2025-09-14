@@ -48,10 +48,4 @@ public class ProfileController {
         EditProfileAdvisorResponse response = profileService.editAdvisorProfile(editProfileAdvisorRequest);
         return ResponseEntity.ok(response);
     }
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        request.getSession().invalidate();  // 使 session 失效
-        return ResponseEntity.ok("Logged out");
-    }
 }

@@ -195,4 +195,10 @@ public class AuthController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(departmentList);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        request.getSession().invalidate();  // 使 session 失效
+        return ResponseEntity.ok("Logged out");
+    }
 }
