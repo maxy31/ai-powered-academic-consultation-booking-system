@@ -27,9 +27,10 @@ CREATE TABLE admins (
 CREATE TABLE advisors (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    department VARCHAR(100) NOT NULL,
+    depart_id BIGINT NOT NULL,
     max_daily_appointments INT DEFAULT 4,
-    CONSTRAINT fk_advisor_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_advisor_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_department FOREIGN KEY (depart_id) REFERENCES department(id) ON DELETE CASCADE
 );
 
 -- Students table
@@ -39,6 +40,13 @@ CREATE TABLE students (
     advisor_id BIGINT,
     CONSTRAINT fk_student_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_student_advisor FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS `department` (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    departmentName VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Timetables -- 
